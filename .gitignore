@@ -2,6 +2,11 @@
 py-feat-0.3.7
 # model
 ResMaskNet_Z_resmasking_dropout1_rot30.pth 
+check_points/
+
+# Tensorboard
+runs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
