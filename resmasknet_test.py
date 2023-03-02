@@ -610,8 +610,8 @@ class ResMasking(ResNet):
         super(ResMasking, self).__init__(
             block=BasicBlock, layers=[3, 4, 6, 3], in_channels=3, num_classes=1000
         )
-        # state_dict = torch.load('saved/checkpoints/resnet18_rot30_2019Nov05_17.44')['net']
-        # state_dict = load_state_dict_from_url(model_urls['resnet34'], progress=True)
+        # state_dict = torch.load(weight_path)['net']
+        # # state_dict = load_state_dict_from_url(model_urls['resnet34'], progress=True)
         # self.load_state_dict(state_dict)
 
         self.fc = nn.Linear(512, 7)

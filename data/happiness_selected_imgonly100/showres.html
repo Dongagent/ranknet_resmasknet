@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Webpage</title>
+  <style>
+    /* Use CSS to style your webpage */
+    .container {
+      display: flex; /* Use flexbox layout to align the text and figures */
+      justify-content: space-between; /* Add some space between the text and figures */
+      align-items: center; /* Align the text and figures vertically */
+    }
+    .text {
+      font-size: 24px;
+      width: 10%; /* Set the width of the text */
+      text-align: center;
+    }
+    .figure {
+      display: inline-block; /* Make the figures align horizontally */
+      width: 15%; /* Set the width of each figure */
+      margin: 2px; /* Remove any space between the figures */
+    }
+    figcaption {
+      display: none; /* Hide the captions */
+    }
+    @media screen and (max-width: 600px) {
+      /* Use media queries to make the layout responsive */
+      .container {
+        flex-direction: column; /* Make the text and figures stack vertically on small screens */
+        align-items: flex-start; /* Align the text and figures to the left */
+        margin: 2px;
+      }
+      figure {
+        display: block; /* Make the figures stack vertically on small screens */
+        width: 98%; /* Set the width of each figure to fill the screen */
+        margin: 1%; /* Add some space between the figures */
+      }
+      figcaption {
+        display: block; /* Show the captions on small screens */
+        text-align: left; /* Align the captions to the left */
+      }
+    }
+  </style>
+</head>
+<body>
+    <h1>Results for four participants</h1>
+    <div id="top5">
+        
+    </div>
+
+    <hr>
+
+    <div id="last5">
+    
+    </div>
+</body>
+<script>
+
+    // from high to low rank
+    // aver for three participants
+    // aver_res = ['ha_212.png', 'ha_393.png', 'ha_412.png', 'ha_428.png', 'ha_50.png', 'ha_491.png', 'ha_341.png', 'ha_489.png', 'ha_288.png', 'ha_367.png', 'ha_185.png', 'ha_422.png', 'ha_24.png', 'ha_348.png', 'ha_202.png', 'ha_443.png', 'ha_107.png', 'ha_301.png', 'ha_407.png', 'ha_235.png', 'ha_450.png', 'ha_268.png', 'ha_32.png', 'ha_11.png', 'ha_201.png', 'ha_130.png', 'ha_315.png', 'ha_19.png', 'ha_243.png', 'ha_184.png', 'ha_27.png', 'ha_497.png', 'ha_33.png', 'ha_311.png', 'ha_241.png', 'ha_384.png', 'ha_329.png', 'ha_256.png', 'ha_151.png', 'ha_221.png', 'ha_296.png', 'ha_320.png', 'ha_149.png', 'ha_186.png', 'ha_476.png', 'ha_122.png', 'ha_368.png', 'ha_342.png', 'ha_152.png', 'ha_284.png', 'ha_344.png', 'ha_442.png', 'ha_207.png', 'ha_303.png', 'ha_377.png', 'ha_54.png', 'ha_244.png', 'ha_215.png', 'ha_2.png', 'ha_106.png', 'ha_451.png', 'ha_43.png', 'ha_132.png', 'ha_482.png', 'ha_466.png', 'ha_396.png', 'ha_477.png', 'ha_124.png', 'ha_5.png', 'ha_131.png', 'ha_382.png', 'ha_454.png', 'ha_249.png', 'ha_59.png', 'ha_252.png', 'ha_404.png', 'ha_334.png', 'ha_172.png', 'ha_111.png', 'ha_1.png', 'ha_292.png', 'ha_380.png', 'ha_9.png', 'ha_128.png', 'ha_475.png', 'ha_110.png', 'ha_310.png', 'ha_381.png', 'ha_262.png', 'ha_399.png', 'ha_233.png', 'ha_314.png', 'ha_174.png', 'ha_84.png', 'ha_139.png', 'ha_116.png', 'ha_119.png', 'ha_145.png', 'ha_257.png', 'ha_16.png'];
+    aver_res = ['ha_212.png', 'ha_393.png', 'ha_428.png', 'ha_489.png', 'ha_412.png', 'ha_202.png', 'ha_348.png', 'ha_24.png', 'ha_407.png', 'ha_288.png', 'ha_367.png', 'ha_341.png', 'ha_235.png', 'ha_443.png', 'ha_450.png', 'ha_185.png', 'ha_50.png', 'ha_491.png', 'ha_301.png', 'ha_11.png', 'ha_422.png', 'ha_130.png', 'ha_243.png', 'ha_201.png', 'ha_32.png', 'ha_19.png', 'ha_384.png', 'ha_184.png', 'ha_311.png', 'ha_497.png', 'ha_256.png', 'ha_27.png', 'ha_107.png', 'ha_268.png', 'ha_329.png', 'ha_315.png', 'ha_2.png', 'ha_368.png', 'ha_241.png', 'ha_303.png', 'ha_221.png', 'ha_151.png', 'ha_342.png', 'ha_296.png', 'ha_152.png', 'ha_442.png', 'ha_186.png', 'ha_344.png', 'ha_215.png', 'ha_320.png', 'ha_149.png', 'ha_122.png', 'ha_54.png', 'ha_476.png', 'ha_106.png', 'ha_249.png', 'ha_132.png', 'ha_33.png', 'ha_207.png', 'ha_451.png', 'ha_172.png', 'ha_244.png', 'ha_454.png', 'ha_43.png', 'ha_131.png', 'ha_377.png', 'ha_396.png', 'ha_284.png', 'ha_59.png', 'ha_1.png', 'ha_252.png', 'ha_466.png', 'ha_110.png', 'ha_404.png', 'ha_292.png', 'ha_124.png', 'ha_482.png', 'ha_477.png', 'ha_5.png', 'ha_382.png', 'ha_9.png', 'ha_334.png', 'ha_381.png', 'ha_111.png', 'ha_380.png', 'ha_310.png', 'ha_475.png', 'ha_128.png', 'ha_314.png', 'ha_262.png', 'ha_174.png', 'ha_119.png', 'ha_139.png', 'ha_257.png', 'ha_233.png', 'ha_116.png', 'ha_399.png', 'ha_84.png', 'ha_145.png', 'ha_16.png']
+    // zhengliang
+    p1_res = ['ha_27.png', 'ha_393.png', 'ha_428.png', 'ha_212.png', 'ha_367.png', 'ha_50.png', 'ha_11.png', 'ha_497.png', 'ha_235.png', 'ha_19.png', 'ha_412.png', 'ha_489.png', 'ha_443.png', 'ha_185.png', 'ha_201.png', 'ha_33.png', 'ha_24.png', 'ha_202.png', 'ha_221.png', 'ha_311.png', 'ha_422.png', 'ha_491.png', 'ha_172.png', 'ha_256.png', 'ha_442.png', 'ha_243.png', 'ha_348.png', 'ha_342.png', 'ha_341.png', 'ha_320.png', 'ha_106.png', 'ha_296.png', 'ha_384.png', 'ha_407.png', 'ha_284.png', 'ha_131.png', 'ha_377.png', 'ha_315.png', 'ha_450.png', 'ha_476.png', 'ha_329.png', 'ha_301.png', 'ha_122.png', 'ha_288.png', 'ha_368.png', 'ha_152.png', 'ha_344.png', 'ha_107.png', 'ha_249.png', 'ha_184.png', 'ha_241.png', 'ha_110.png', 'ha_1.png', 'ha_32.png', 'ha_132.png', 'ha_451.png', 'ha_215.png', 'ha_59.png', 'ha_466.png', 'ha_244.png', 'ha_252.png', 'ha_380.png', 'ha_477.png', 'ha_268.png', 'ha_130.png', 'ha_454.png', 'ha_207.png', 'ha_111.png', 'ha_149.png', 'ha_475.png', 'ha_124.png', 'ha_145.png', 'ha_303.png', 'ha_54.png', 'ha_482.png', 'ha_174.png', 'ha_262.png', 'ha_233.png', 'ha_292.png', 'ha_128.png', 'ha_151.png', 'ha_334.png', 'ha_314.png', 'ha_396.png', 'ha_186.png', 'ha_9.png', 'ha_43.png', 'ha_116.png', 'ha_404.png', 'ha_310.png', 'ha_381.png', 'ha_84.png', 'ha_16.png', 'ha_119.png', 'ha_399.png', 'ha_139.png', 'ha_5.png', 'ha_2.png', 'ha_382.png', 'ha_257.png']
+    // zitang
+    p2_res = ['ha_367.png', 'ha_315.png', 'ha_428.png', 'ha_393.png', 'ha_212.png', 'ha_50.png', 'ha_288.png', 'ha_184.png', 'ha_107.png', 'ha_130.png', 'ha_24.png', 'ha_412.png', 'ha_186.png', 'ha_268.png', 'ha_244.png', 'ha_348.png', 'ha_185.png', 'ha_19.png', 'ha_334.png', 'ha_301.png', 'ha_450.png', 'ha_407.png', 'ha_341.png', 'ha_451.png', 'ha_303.png', 'ha_491.png', 'ha_5.png', 'ha_241.png', 'ha_207.png', 'ha_477.png', 'ha_124.png', 'ha_252.png', 'ha_422.png', 'ha_342.png', 'ha_32.png', 'ha_311.png', 'ha_152.png', 'ha_497.png', 'ha_2.png', 'ha_11.png', 'ha_296.png', 'ha_489.png', 'ha_344.png', 'ha_151.png', 'ha_59.png', 'ha_149.png', 'ha_382.png', 'ha_84.png', 'ha_396.png', 'ha_9.png', 'ha_128.png', 'ha_202.png', 'ha_139.png', 'ha_310.png', 'ha_111.png', 'ha_314.png', 'ha_482.png', 'ha_381.png', 'ha_443.png', 'ha_122.png', 'ha_33.png', 'ha_475.png', 'ha_43.png', 'ha_377.png', 'ha_329.png', 'ha_380.png', 'ha_132.png', 'ha_404.png', 'ha_131.png', 'ha_476.png', 'ha_221.png', 'ha_399.png', 'ha_243.png', 'ha_201.png', 'ha_384.png', 'ha_235.png', 'ha_442.png', 'ha_284.png', 'ha_1.png', 'ha_106.png', 'ha_466.png', 'ha_249.png', 'ha_262.png', 'ha_320.png', 'ha_172.png', 'ha_454.png', 'ha_256.png', 'ha_54.png', 'ha_368.png', 'ha_292.png', 'ha_257.png', 'ha_174.png', 'ha_145.png', 'ha_16.png', 'ha_233.png', 'ha_119.png', 'ha_110.png', 'ha_215.png', 'ha_27.png', 'ha_116.png']
+    // yenju
+    p3_res = ['ha_54.png', 'ha_235.png', 'ha_202.png', 'ha_489.png', 'ha_443.png', 'ha_341.png', 'ha_32.png', 'ha_491.png', 'ha_288.png', 'ha_201.png', 'ha_243.png', 'ha_215.png', 'ha_268.png', 'ha_422.png', 'ha_151.png', 'ha_412.png', 'ha_212.png', 'ha_27.png', 'ha_301.png', 'ha_368.png', 'ha_43.png', 'ha_384.png', 'ha_107.png', 'ha_393.png', 'ha_130.png', 'ha_407.png', 'ha_450.png', 'ha_256.png', 'ha_348.png', 'ha_2.png', 'ha_320.png', 'ha_329.png', 'ha_454.png', 'ha_149.png', 'ha_428.png', 'ha_185.png', 'ha_466.png', 'ha_404.png', 'ha_382.png', 'ha_24.png', 'ha_476.png', 'ha_482.png', 'ha_50.png', 'ha_292.png', 'ha_284.png', 'ha_396.png', 'ha_241.png', 'ha_33.png', 'ha_122.png', 'ha_132.png', 'ha_11.png', 'ha_186.png', 'ha_221.png', 'ha_249.png', 'ha_184.png', 'ha_367.png', 'ha_5.png', 'ha_106.png', 'ha_442.png', 'ha_315.png', 'ha_377.png', 'ha_233.png', 'ha_116.png', 'ha_303.png', 'ha_207.png', 'ha_399.png', 'ha_174.png', 'ha_119.png', 'ha_311.png', 'ha_296.png', 'ha_344.png', 'ha_262.png', 'ha_110.png', 'ha_257.png', 'ha_152.png', 'ha_497.png', 'ha_131.png', 'ha_19.png', 'ha_124.png', 'ha_1.png', 'ha_381.png', 'ha_310.png', 'ha_9.png', 'ha_111.png', 'ha_59.png', 'ha_380.png', 'ha_477.png', 'ha_475.png', 'ha_128.png', 'ha_451.png', 'ha_244.png', 'ha_172.png', 'ha_342.png', 'ha_145.png', 'ha_252.png', 'ha_314.png', 'ha_16.png', 'ha_84.png', 'ha_334.png', 'ha_139.png']
+    // dongsheng
+    p4_res = ['ha_489.png', 'ha_407.png', 'ha_256.png', 'ha_384.png', 'ha_243.png', 'ha_202.png', 'ha_235.png', 'ha_348.png', 'ha_2.png', 'ha_450.png', 'ha_428.png', 'ha_11.png', 'ha_24.png', 'ha_130.png', 'ha_212.png', 'ha_393.png', 'ha_311.png', 'ha_443.png', 'ha_201.png', 'ha_497.png', 'ha_412.png', 'ha_184.png', 'ha_368.png', 'ha_303.png', 'ha_288.png', 'ha_329.png', 'ha_19.png', 'ha_367.png', 'ha_301.png', 'ha_185.png', 'ha_249.png', 'ha_172.png', 'ha_341.png', 'ha_27.png', 'ha_342.png', 'ha_32.png', 'ha_110.png', 'ha_152.png', 'ha_215.png', 'ha_442.png', 'ha_1.png', 'ha_422.png', 'ha_344.png', 'ha_221.png', 'ha_106.png', 'ha_50.png', 'ha_491.png', 'ha_151.png', 'ha_54.png', 'ha_292.png', 'ha_132.png', 'ha_241.png', 'ha_296.png', 'ha_186.png', 'ha_454.png', 'ha_451.png', 'ha_257.png', 'ha_119.png', 'ha_122.png', 'ha_149.png', 'ha_131.png', 'ha_476.png', 'ha_320.png', 'ha_59.png', 'ha_207.png', 'ha_252.png', 'ha_404.png', 'ha_396.png', 'ha_268.png', 'ha_43.png', 'ha_244.png', 'ha_381.png', 'ha_139.png', 'ha_315.png', 'ha_107.png', 'ha_314.png', 'ha_116.png', 'ha_9.png', 'ha_310.png', 'ha_174.png', 'ha_466.png', 'ha_262.png', 'ha_145.png', 'ha_377.png', 'ha_475.png', 'ha_124.png', 'ha_128.png', 'ha_233.png', 'ha_16.png', 'ha_380.png', 'ha_477.png', 'ha_284.png', 'ha_5.png', 'ha_482.png', 'ha_382.png', 'ha_84.png', 'ha_111.png', 'ha_399.png', 'ha_33.png', 'ha_334.png']
+
+    function addImageList(divID, imageContainerId, image_name_list, note) {
+        var divContainer = document.getElementById(divID);
+        var imageContainer = document.createElement('div');
+        divContainer.appendChild(imageContainer);
+        imageContainer.id = imageContainerId;
+        imageContainer.classList.add('container');
+        imageContainer.innerHTML = '<p class="text">'+ note +'</p>';
+
+        for (var i = 0; i < image_name_list.length; i++) {
+            var image = document.createElement("img");
+            image.src = image_name_list[i];
+            image.className = "figure";
+            imageContainer.appendChild(image);
+        }
+    }
+
+    addImageList('top5', "top5_aver", aver_res.slice(0, 5), 'Average');
+    addImageList('top5', "top5_p1", p1_res.slice(0, 5), 'Participant 1');
+    addImageList('top5', "top5_p2", p2_res.slice(0, 5), 'Participant 2');
+    addImageList('top5', "top5_p3", p3_res.slice(0, 5), 'Participant 3');
+    addImageList('top5', "top5_p4", p4_res.slice(0, 5), 'Participant 4');
+
+    addImageList('last5', "last5_aver", aver_res.slice(-5), 'Average');
+    addImageList('last5', "last5_p1", p1_res.slice(-5), 'Participant 1');
+    addImageList('last5', "last5_p2", p2_res.slice(-5), 'Participant 2');
+    addImageList('last5', "last5_p3", p3_res.slice(-5), 'Participant 3');
+    addImageList('last5', "last5_p4", p4_res.slice(-5), 'Participant 4');
+
+
+
+    // Use JavaScript to add your images to the webpage
+    // var imageContainer = document.getElementById("top5_aver");
+
+    // // top 5 images with average rating
+    // var top5_aver_images = ['ha_212.png', 'ha_393.png', 'ha_412.png', 'ha_428.png', 'ha_50.png'];
+    // for (var i = 0; i < 5; i++) {
+    //     var image = document.createElement("img");
+    //     image.src = top5_aver_images[i];
+    //     // image.id = "image_aver" + i;
+    //     image.className = "figure";
+    //     imageContainer.appendChild(image);
+    // }
+
+
+</script>
+
+
+</html>
