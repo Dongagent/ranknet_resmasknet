@@ -28,7 +28,7 @@ BATCH_SIZE = 128
 # prefix = 'cleaned_88_img'
 # prefix = 'py_feat_100_happy_img'
 CURR_EMO = 'angry'
-prefix = CURR_EMO.capitalize() + '_Rank1_50_include_neg_valid_no_see'
+prefix = CURR_EMO.capitalize() + '_Rank1_50_include_neg'
 
 print('lr: {}\nBATCH_SIZE: {}\nweight_decay: {}\nmomentum: {}\nEPOCHS: {}'.format(lr, BATCH_SIZE, weight_decay, momentum, EPOCHS))
 
@@ -143,47 +143,10 @@ class SiameseRankNet(nn.Module):
         # normalize x1 - x2 as a probability that x1 should rank higher than x2
         x = self.sigmoid(x1 - x2)
         return x
+    
 
 
-def generate_dataset_with_neg(good_set, bad_set, base_folder):
-    dataset = []
-    for i in range(len(good_set)):
-        for j in range(i+1, len(good_set)):
-            dataset.append([[good_set[i], good_set[j]], 1])
-
-    for i in good_set:
-        for j in bad_set:
-            dataset.append([[i, j], 1])
-    for i in range(len(dataset)):
-        dataset[i][0] = [os.path.join(base_folder, dataset[i][0][j]) for j in range(len(dataset[i][0]))]
-    return dataset
-
-def split_data(raw_data):
-    # Split data into train, val sets
-    num_data = len(raw_data)
-    num_train = int(0.8 * num_data)
-    num_val = num_data - num_train
-
-    # Create indices for train and val sets
-    indices = list(range(num_data))
-    random.shuffle(indices)
-    train_indices = indices[:num_train]
-    val_indices = indices[num_train:]
-
-    # Create train and val datasets by indexing the PairwiseRatingDataset instance
-    train_dataset = [raw_data[i] for i in train_indices]
-    val_dataset = [raw_data[i] for i in val_indices]
-    train_dataset = PairwiseRatingDataset(train_dataset, transform=transform)
-    val_dataset = PairwiseRatingDataset(val_dataset, transform=transform)
-
-    return train_dataset, val_dataset
-
-
-# Type 1
-# First construct the pairwise comparisons, then construct the dataset.
 # test for pyfeat ranking
-
-'''
 aver_sorted_data = average_human_order[CURR_EMO]
 
 # test for pyfeat ranking
@@ -203,11 +166,20 @@ def generate_dataset(data_path):
     return dataset
 
 # all category data
-# WRONG!
-# g_data, b_data = feat_order[CURR_EMO][:50], feat_order[CURR_EMO][50:]
+g_data, b_data = feat_order[CURR_EMO][:50], feat_order[CURR_EMO][50:]
 
-aver_sorted_g_data = [i for i in aver_sorted_data if i in g_data]
-aver_sorted_b_data = [i for i in aver_sorted_data if i in b_data]
+def generate_dataset_with_neg(good_set, bad_set, base_folder):
+    dataset = []
+    for i in range(len(good_set)):
+        for j in range(i+1, len(good_set)):
+            dataset.append([[good_set[i], good_set[j]], 1])
+
+    for i in good_set:
+        for j in bad_set:
+            dataset.append([[i, j], 1])
+    for i in range(len(dataset)):
+        dataset[i][0] = [os.path.join(base_folder, dataset[i][0][j]) for j in range(len(dataset[i][0]))]
+    return dataset
 
 
 if not include_neg:
@@ -217,40 +189,11 @@ else:
     # include negative images
     print('including negative images')
     raw_data_for_valid = generate_dataset(data_path)
-    raw_data = generate_dataset_with_neg(aver_sorted_g_data, aver_sorted_b_data, base_folder)
+    raw_data = generate_dataset_with_neg(g_data, b_data, base_folder)
 
-bak_train_dataset, bak_val_dataset = split_data(raw_data_for_valid)
-
-'''
+# print(raw_data)
 
 
-
-# Type 2 split a small set of figure as valid set first.
-CURR_EMO = 'happy'
-aver_sorted_data = average_human_order[CURR_EMO]
-g_data, b_data = feat_order[CURR_EMO][:50], feat_order[CURR_EMO][50:]
-base_folder = base_folders[CURR_EMO]
-
-# get average sorted good data in human rating order
-aver_sorted_g_data = [i for i in aver_sorted_data if i in g_data]
-aver_sorted_b_data = [i for i in aver_sorted_data if i in b_data]
-
-def valid_image_split_func(humandata):
-    valid_set_index = random.sample(range(50), 10)
-    valid_set_index.sort()
-    train_set_index = [i for i in range(50) if i not in valid_set_index]
-    train_set_index.sort()
-
-    train_set_name = [humandata[i] for i in train_set_index]
-    valid_set_name = [humandata[i] for i in valid_set_index]
-    
-    return train_set_name, valid_set_name
-
-train_set_g_name, valid_set_g_name = valid_image_split_func(aver_sorted_g_data)
-train_set_b_name, valid_set_b_name = valid_image_split_func(aver_sorted_g_data)
-
-train_set = generate_dataset_with_neg(train_set_g_name, train_set_b_name, base_folder)
-valid_set = generate_dataset_with_neg(valid_set_g_name, valid_set_b_name, base_folder)
 
 
 
@@ -321,27 +264,65 @@ transform = transforms.Compose([
 
 
 model = SiameseRankNet()
+
 # speed up
 # model = torch.nn.DataParallel(model, device_ids=[0, 1])
+
+
 if torch.cuda.is_available():
     device = torch.device('cuda')
 else:
     raise 'CUDA is not available'
 model = model.cuda()
 # .to(device)
+
 # parallel training
 model = nn.DataParallel(model)
 # torch.distributed.init_process_group(backend="nccl")
 # model = DistributedDataParallel(model) # device_ids will include all GPU devices by default
 
 
-# Type 1
-# bak_train_dataset, bak_val_dataset = split_data(raw_data_for_valid)
+# dataset = PairwiseRatingDataset(raw_data, transform=transform)
 
-# Type 2
-train_dataset = PairwiseRatingDataset(train_set, transform=transform)
-val_dataset = PairwiseRatingDataset(valid_set, transform=transform)
+def split_data(data):
+    # Split data into train, val sets
+    num_data = len(raw_data)
+    num_train = int(0.8 * num_data)
+    num_val = num_data - num_train
 
+    # Create indices for train and val sets
+    indices = list(range(num_data))
+    random.shuffle(indices)
+    train_indices = indices[:num_train]
+    val_indices = indices[num_train:]
+
+    # Create train and val datasets by indexing the PairwiseRatingDataset instance
+    train_dataset = [raw_data[i] for i in train_indices]
+    val_dataset = [raw_data[i] for i in val_indices]
+    train_dataset = PairwiseRatingDataset(train_dataset, transform=transform)
+    val_dataset = PairwiseRatingDataset(val_dataset, transform=transform)
+
+    return train_dataset, val_dataset
+
+bak_train_dataset, bak_val_dataset = split_data(raw_data_for_valid)
+    
+
+# Split data into train, val sets
+num_data = len(raw_data)
+num_train = int(0.8 * num_data)
+num_val = num_data - num_train
+
+# Create indices for train and val sets
+indices = list(range(num_data))
+random.shuffle(indices)
+train_indices = indices[:num_train]
+val_indices = indices[num_train:]
+
+# Create train and val datasets by indexing the PairwiseRatingDataset instance
+train_dataset = [raw_data[i] for i in train_indices]
+val_dataset = [raw_data[i] for i in val_indices]
+train_dataset = PairwiseRatingDataset(train_dataset, transform=transform)
+val_dataset = PairwiseRatingDataset(val_dataset, transform=transform)
 
 # Create DistributedSampler to handle distributing the dataset across nodes when training
 # This can only be called after torch.distributed.init_process_group is called
@@ -355,9 +336,6 @@ train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers 
 # val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 # use good vs good only for val
 val_dataloader = DataLoader(bak_val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-
-
-
 
 loss_func = nn.BCELoss()
 # loss_func = nn.CrossEntropyLoss()
@@ -431,131 +409,32 @@ def train_one_epoch(epoch_index, tb_writer):
     return avg_loss, avg_acc
 
 
-# Initializing in a separate cell so we can easily add more epochs to the same run
-timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-writer = SummaryWriter('run/ranknet_trainer_{}_{}'.format(prefix,timestamp))
-# Define the path and name of your log file
-logfile = timestamp + "log.json"
-logfile = os.path.join('check_points', prefix, timestamp, logfile)
+model.eval()
 
-# Define an empty dictionary object to store your log data
-logdata = {}
+running_vloss = 0.0
 
-best_vloss = 1_000_000.
-best_vacc = -1.
+# eval
+# DEBUG mode
+vacc = 0.
+for i, vdata in tqdm(enumerate(val_dataloader), total=len(val_dataloader), leave=False):
+    with torch.no_grad():
+        vimgs1, vimgs2, vlabels = vdata[0].cuda(non_blocking=True), vdata[1].cuda(non_blocking=True), vdata[2].cuda(non_blocking=True)
+        vlabels = vlabels.unsqueeze(1)
+        vlabels = vlabels.float()
 
-# folders
-if not os.path.exists('check_points'):
-    os.mkdir('check_points')
-if not os.path.exists(os.path.join('check_points', prefix, timestamp)):
-    os.makedirs(os.path.join('check_points', prefix, timestamp))
-
-# write config file in the dest folder
-config = {
-    CURR_EMO: CURR_EMO,
-    lr: lr,
-    weight_decay: weight_decay,
-    momentum: momentum,
-    # TOTAL epoch
-    EPOCHS: EPOCHS,
-    val_start_epoch: val_start_epoch,
-    include_neg: include_neg,
-    BATCH_SIZE:BATCH_SIZE,
-    prefix: prefix,
-    timestamp: timestamp,
-}
-conf_file = os.path.join('check_points', prefix, timestamp, "config.json")
-
-if not os.path.isfile(conf_file):
-    with open(conf_file, 'w') as f:
-        json.dump(config, f)
         
+        voutputs = model([vimgs1, vimgs2])
+        
+        
+        vloss = loss_func(voutputs, vlabels)
+        running_vloss += vloss
+        acc = accuracy(voutputs, vlabels)[0]
+        acc = acc.sum() / len(acc)
+        vacc += acc
 
-for epoch in range(EPOCHS):
-    epoch_number = epoch
-    print('\nEPOCH {}:'.format(epoch_number + 1))
-    
-    # Make sure gradient tracking is on, and do a pass over the data
-    model.train()
-    avg_loss, avg_acc = train_one_epoch(epoch_number, writer)
-    print(f'\nTraining LOSS: {avg_loss}')
-    print(f'Training ACC: {avg_acc}')
-    # We don't need gradients on to do reporting
-    model.eval()
-
-    running_vloss = 0.0
-    
-    # Log the running loss averaged per batch
-    writer.add_scalar('EPOCH ACC/train', avg_acc, epoch_number + 1)
-    writer.add_scalar('EPOCH Loss/train', avg_loss, epoch_number + 1)
-    # eval
-    # DEBUG mode
-    if epoch + 1 > val_start_epoch or True:
-        vacc = 0.
-        for i, vdata in tqdm(enumerate(val_dataloader), total=len(val_dataloader), leave=False):
-            with torch.no_grad():
-                vimgs1, vimgs2, vlabels = vdata[0].cuda(non_blocking=True), vdata[1].cuda(non_blocking=True), vdata[2].cuda(non_blocking=True)
-                vlabels = vlabels.unsqueeze(1)
-                vlabels = vlabels.float()
-
-                voutputs = model([vimgs1, vimgs2])
-                vloss = loss_func(voutputs, vlabels)
-                running_vloss += vloss
-                acc = accuracy(voutputs, vlabels)[0]
-                acc = acc.sum() / len(acc)
-                vacc += acc
+    avg_vacc = vacc / (i + 1)
+    avg_vloss = running_vloss / (i + 1)
+    print('EPOCH 0')
+    print('LOSS valid {}'.format(avg_vloss))
+    print('ACC valid {}'.format(avg_vacc))
             
-        avg_vacc = vacc / (i + 1)
-        avg_vloss = running_vloss / (i + 1)
-        print('Result of EPOCH', epoch_number + 1)
-        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
-        print('ACC train {} valid {}'.format(avg_acc, avg_vacc))
-            
-        writer.add_scalar('EPOCH ACC/valid', avg_vacc, epoch_number + 1)
-        writer.add_scalar('EPOCH Loss/valid', avg_vloss, epoch_number + 1)
-    
-    
-        writer.add_scalars('Training vs. Validation Loss/EPOCH',
-                        { 'Training' : avg_loss, 'Validation' : avg_vloss },
-                        epoch_number + 1)
-        writer.add_scalars('Training vs. Validation Acc/EPOCH',
-                        { 'Training' : avg_acc, 'Validation' : avg_vacc },
-                        epoch_number + 1)
-    
-
-        # Track best performance, and save the model's state
-        # use acc instead
-        if avg_vacc > best_vacc or avg_vacc > 0.7:
-            best_vacc = avg_vacc
-            model_path = 'model_{}_epoch{}.pt'.format(timestamp, epoch_number + 1)
-            model_path = os.path.join('check_points', prefix, timestamp, model_path)
-            torch.save(model.state_dict(), model_path)
-        # if avg_vloss < best_vloss:
-        #     best_vloss = avg_vloss
-        #     model_path = 'model_{}_epoch{}'.format(timestamp, epoch_number + 1)
-        #     torch.save(model.state_dict(), model_path)
-
-        # Store the values in a sub-dictionary with epoch number as key
-        logdata[epoch_number + 1] = {
-            "train_loss": avg_loss,
-            "train_acc": avg_acc,
-            "val_loss": avg_vloss.tolist(),
-            "val_acc": avg_vacc.tolist()
-        }
-    writer.flush()
-    epoch_number += 1
-
-
-feeds = []
-# Write the dictionary object to your log file as JSON
-if not os.path.isfile(logfile):
-    with open(logfile, 'w') as f:
-        json.dump(logdata, f)
-else:
-    with open(logfile) as feedsjson:
-        feeds = json.load(feedsjson)
-    for k,v in logdata.items():
-        feeds[k] = v
-    with open(logfile, mode='w') as f:
-        f.write(json.dumps(feeds, indent=2))
-
